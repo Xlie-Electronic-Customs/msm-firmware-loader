@@ -54,11 +54,8 @@ mount -o mode=755,nodev,noexec,nosuid -t tmpfs none "$BASEDIR"
 mkdir "$BASEDIR/mnt"
 mkdir "$BASEDIR/target"
 
-# Scanning and mounting partitions we're interested in:
-
-# /dev/disk/by-partlabel symlinks don't exist yet, scan sysfs for names instead
-for part in /sys/block/sd*/sd*
-do
+moun_partition() {
+	local part=$1
 	DEVNAME="$(grep DEVNAME "$part"/uevent | sed 's/DEVNAME=//g')"
 	PARTNAME="$(grep PARTNAME "$part"/uevent | sed 's/PARTNAME=//g')"
 
@@ -68,7 +65,22 @@ do
 		mount -o ro,nodev,noexec,nosuid \
 			"/dev/$DEVNAME" "$BASEDIR/mnt/$PARTNAME"
 	fi
+}
+
+# Scanning and mounting partitions we're interested in:
+
+# /dev/disk/by-partlabel symlinks don't exist yet, scan sysfs for names instead
+for part in /sys/block/sd*/sd*
+do
+	moun_partition part
 done
+
+for part in /sys/block/mmcblk*/mmcblk*p*
+do
+	moun_partition part
+done
+
+
 
 # Linking blobs from all partitions:
 
