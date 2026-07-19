@@ -119,6 +119,19 @@ do
 	done
 done
 
+if [ -d "$BASEDIR"/mnt/persist ]
+then
+	if [ ! -d /tmp/tqftpserv ]
+	then
+		ln -s "$BASEDIR"/mnt/persist/rfs/msm/mpss /tmp/tqftpserv
+	fi
+
+	if [ ! -d /usr/share/qcom/sm*/*/*/sensors/registry ]
+	then
+		ln -s "$BASEDIR"/mnt/persist/sensors/registry/registry /usr/share/qcom/sm*/*/*/sensors/registry
+	fi
+fi
+
 # Check WCNSS_qcom_wlan_nv.bin in persist partition
 if [ -f "$BASEDIR"/mnt/persist/WCNSS_qcom_wlan_nv.bin ]
 then
