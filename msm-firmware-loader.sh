@@ -25,7 +25,7 @@ ab_get_slot() {
 	if command -v qbootctl > /dev/null; then
 		ab_slot_suffix=$(qbootctl -a | grep -o 'Active slot: ..' | cut -d ":" -f2 | xargs) || :
 	else
-		ab_slot_suffix=$(grep -o 'androidboot\.slot_suffix=..' /proc/cmdline |  cut -d "=" -f2) || :
+		ab_slot_suffix="_a"
 	fi
 	echo "$ab_slot_suffix"
 }
@@ -37,6 +37,7 @@ FW_PARTITIONS="
 	apnhlos
 	bluetooth$(ab_get_slot)
 	modem$(ab_get_slot)
+	soccp$(ab_get_slot)
 	persist
 "
 
