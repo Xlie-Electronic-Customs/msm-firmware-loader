@@ -70,13 +70,13 @@ moun_partition() {
 # Scanning and mounting partitions we're interested in:
 
 # /dev/disk/by-partlabel symlinks don't exist yet, scan sysfs for names instead
-for part_sd in /sys/block/sd*/sd*
-do
+for part_sd in /sys/block/sd*/sd*; do
+	[ -e "$part_sd" ] || continue
 	moun_partition "$part_sd"
 done
 
-for part_mmcblk in /sys/block/mmcblk*/mmcblk*p*
-do
+for part_mmcblk in /sys/block/mmcblk*/mmcblk*p*; do
+	[ -e "$part_mmcblk" ] || continue
 	moun_partition "$part_mmcblk"
 done
 
@@ -115,6 +115,7 @@ do
 
 	for part in "$BASEDIR"/mnt/*/image/"$BLOBBASE"*
 	do
+		if [ "$(basename "$part")" == "modem_pr" ]; then break; fi
 		ln -s "$part" "$BASEDIR/target/$(basename "$part")"
 	done
 done
@@ -124,9 +125,17 @@ then
 	ln -s "$BASEDIR"/mnt/persist/rfs/msm/mpss /tmp/tqftpserv
 fi
 
-if [ -d "$BASEDIR"/mnt/persist ] && [ ! -d /usr/share/qcom/sm*/*/*/sensors/registry ]
+if [ -d "$BASEDIR"/mnt/persist ]
 then
-	ln -s "$BASEDIR"/mnt/persist/sensors/registry/registry /usr/share/qcom/sm*/*/*/sensors/
+	if [ -d /usr/share/qcom/sensors/registry ]; then
+		for sns in "$BASEDIR"/mnt/persist/sensors/registry/registry/*; do
+			[ -e "$sns" ] || continue
+			ln -s "$sns" "/usr/share/qcom/sensors/registry/$(basename "$sns")"
+		done
+	fi
+	if [ -d /usr/share/qcom/sensors/ ] && [ ! -f /usr/share/qcom/sensors/sns_reg_version ]; then
+		ln -s "$BASEDIR"/mnt/persist/sensors/registry/sns_reg_version /usr/share/qcom/sensors/sns_reg_version
+	fi
 fi
 
 # Check WCNSS_qcom_wlan_nv.bin in persist partition
